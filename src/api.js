@@ -15,10 +15,9 @@ mainRouter.get('/pefl', (req, res) => {
 
 mainRouter.get('/info', async (req, res) => {
     console.log("#### GET info Route");
-    const mongoClient = await require('../mongo/db-mongo')();
-    const data2 = await mongoClient._db.collection("info").find({ players: { $exists: true } }).toArray();
-    mongoClient.client.close();
-    res.json(data2)
+
+    const _info = await require('../mongo/get-mongo-data')('info', { players: { $exists: true } });
+    res.json(_info)
 })
 
 mainRouter.get('/env-test', async (req, res) => {
