@@ -1,8 +1,14 @@
 const express = require('express');
+const bodyParser = require('body-parser');
+const url = require('url');
+const querystring = require('querystring');
+
 const serverless = require('serverless-http');
 const { Router } = require('express');
 
 const app = express();
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
 const mainRouter = express.Router();
 
@@ -21,6 +27,27 @@ mainRouter.get('/info', async (req, res) => {
     res.json(_info)
 })
 
+mainRouter.get('/find-players', async (req, res) => {
+    console.log("#### GET info Route");
+    // const params = url.parse(req.url, true).query;
+    // const _q = req.query;
+    const { nation: _nation = 170 } = req.query;
+
+    // const _name = params["name"];
+    // console.log(params);
+    console.log("#### body : ", body);
+
+    console.log("####### query  : ", req.query);
+    console.log("####### _nation  : ", _nation);
+
+
+
+
+    const _base = await require('../mongo/get-mongo-data')('allbase', { "nation": +_nation });
+    console.log("### info", _base.length)
+    res.json(_base)
+})
+
 
 mainRouter.get('/db-test', async (req, res) => {
     console.log("#### GET db-test Route");
@@ -35,18 +62,17 @@ mainRouter.get('/db-test', async (req, res) => {
 
     try {
         client = await MongoClient.connect(URI, { useNewUrlParser: true, useUnifiedTopology: true });
-
-        // const dataBase = await client.db(DB_NAME);
-        // _data = await dataBase.collection('info').find({ players: { $exists: true } }).toArray();
-        _data = clint.db;
+        const dataBase = await client.db(DB_NAME);
+        _data = await dataBase.collection('info').find({ players: { $exists: true } }).toArray();
+        _data = client.db;
         console.log("### info", _data);
     } catch (error) {
         console.log("mongo-error : ", error);
         _data = "mongo-error : " + error;
     } finally {
         client.close();
-        // res.json(_data)
         res.json(_data)
+        // res.status(200).jsonp(_data)
     }
 
 
