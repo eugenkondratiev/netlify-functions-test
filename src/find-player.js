@@ -18,31 +18,44 @@ const urlencodedParser = bodyParser.urlencoded({ extended: false })
 findPlayerRouter.get('/:nation/', urlencodedParser, async (req, res) => {
     console.log("#### GET find-players XXX Route");
     let _resp = null;
-    const { nation} = req.params;
+    const { nation } = req.params;
 
     try {
-        const { limit: _limit = 100, start: _start = 0} = req.query;
+        const { limit, start: _start = false, count} = req.query;
+        const _count = count || (!limit && !_start);
+        const _limit = _count ? false : (limit || 30);
         console.log("####### get nation query  : ", req.query);
-        console.log("####### get nation params : ", req.params, "  nation = ", nation, +nation, +nation ? { "nation": +nation } : {});
-    console.log("#### GET find-players nation  Route");
+        console.log("####### _limit _start _count  : ", _limit, _start ,_count);
 
-        const _resp = await require('../mongo/get-mongo-data')('allbase', +nation ? { "nation": +nation } : {}, { limit: +_limit || 100, start: _start || 0 });
-        console.log("### info", _resp && _resp.length)
+        console.log("####### get nation params : ", req.params, "  nation = ", nation, +nation, +nation ? { "nation": +nation } : {});
+        console.log("#### GET find-players nation  Route");
+
+        const answer = await require('../mongo/get-mongo-data')(
+            'allbase',
+            +nation ? { "nation": +nation } : {},
+            { limit: +_limit || false, start: _start || false}
+        );
+
+        console.log("### resp info", typeof answer, answer && answer.length);
+        _resp = _count ? answer.length : answer
     } catch (error) {
         _resp = error.message;
+        console.log("/:nation/ error", error)
     }
     finally {
+        console.log("### finally resp ", _resp)
+
+        res.json(_resp)
 
     }
 
-    res.json(_resp)
 })
 
 findPlayerRouter.get('/', urlencodedParser, async (req, res) => {
     console.log("#### GET find-players Route");
     // const params = url.parse(req.url, true).query;
     // const _q = req.query;
-    const { limit: _limit = 10, start: _start = 100 } = req.query;
+    const { limit: _limit = 20, start: _start = false } = req.query;
 
     // const _name = params["name"];
     // // console.log(params);
@@ -52,7 +65,7 @@ findPlayerRouter.get('/', urlencodedParser, async (req, res) => {
     console.log("####### POST query  : ", req.query);
     // console.log("####### POST _nation  : ", _nation);
 
-    const _base = await require('../mongo/get-mongo-data')('allbase', {}, { limit: +_limit || 10, start: _start || 100 });
+    const _base = await require('../mongo/get-mongo-data')('allbase', {}, { limit: +_limit || 20, start: _start || false });
     console.log("### info", _base.length)
     res.json(_base)
 })

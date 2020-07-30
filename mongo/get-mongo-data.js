@@ -8,6 +8,7 @@ module.exports = async (_collection, _query = {}, _options) => {
   const URI = process.env.MONGODB_URI;
   const DB_NAME = process.env.MONGODB_DB_NAME;
   console.log("#### options = ", _options);
+  console.log("#### _query = ", _query);
 
   const { limit = false, count = false, start = false } = _options || {};
 
@@ -20,7 +21,7 @@ module.exports = async (_collection, _query = {}, _options) => {
 
     if (count) {
 
-      _data = await dataBase.collection(_collection).count();
+      _data = await dataBase.collection(_collection).countDocuments();
     } else if (limit) {
       if (start) {
         _data = await dataBase.collection(_collection).find(_query).skip(+start).limit(+limit).toArray();
