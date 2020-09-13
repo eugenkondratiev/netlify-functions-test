@@ -32,7 +32,7 @@ findPlayerRouter.get('/:nation/', urlencodedParser, async (req, res) => {
 
         const answer = await require('../mongo/get-mongo-data')(
             'allbase',
-            +nation ? { "nation": +nation } : {},
+            +nation ? { "nation": nation } : {},
             { limit: +_limit || false, start: _start || false}
         );
 

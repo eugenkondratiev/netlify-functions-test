@@ -24,12 +24,28 @@ mainRouter.get('/pefl', (req, res) => {
 
 mainRouter.get('/info', async (req, res) => {
     console.log("#### GET info Route");
-
-    const _info = await require('../mongo/get-mongo-data')('info', { host: { $exists: true } });
-    console.log("### info", _info)
-    res.json(_info)
+    try {
+        const _info = await require('../mongo/get-mongo-data')('info', { host: { $exists: true } });
+        console.log("### info", _info)
+        res.json(_info)
+    } catch (error) {
+        console.log("mongo-error : ", error);
+        res.status(500).json(`mongo-error : ${error}`)
+    } 
 })
 
+mainRouter.get('/pairs', async (req, res) => {
+    console.log("#### GET pairs Route");
+    try {
+        const _pairs = await require('../mongo/get-mongo-data')('info', { pairs: { $exists: true } });
+        console.log("### pairs", _pairs)
+        res.json(_pairs)
+    } catch (error) {
+        console.log("mongo-error : ", error);
+        res.status(500).json(`mongo-error : ${error}`);
+    }
+
+})
 
 mainRouter.get('/db-test', async (req, res) => {
     console.log("#### GET db-test Route");
@@ -69,7 +85,7 @@ mainRouter.get('/env-test', async (req, res) => {
 
     const { MONGODB_URI, MONGODB_DB_NAME } = process.env;
     const data2 = { MONGODB_URI, MONGODB_DB_NAME }
-    res.json({"env":["MONGODB_URI", "MONGODB_DB_NAME"]})
+    res.json({ "env": ["MONGODB_URI", "MONGODB_DB_NAME"] })
 
 })
 
