@@ -25,7 +25,7 @@ mainRouter.get('/pefl', (req, res) => {
 mainRouter.get('/info', async (req, res) => {
     console.log("#### GET info Route");
 
-    const _info = await require('../mongo/get-mongo-data')('info', { players: { $exists: true } });
+    const _info = await require('../mongo/get-mongo-data')('info', { host: { $exists: true } });
     console.log("### info", _info)
     res.json(_info)
 })
@@ -45,12 +45,13 @@ mainRouter.get('/db-test', async (req, res) => {
     try {
         client = await MongoClient.connect(URI, { useNewUrlParser: true, useUnifiedTopology: true });
         const dataBase = await client.db(DB_NAME);
-        _data = await dataBase.collection('info').find({ players: { $exists: true } }).toArray();
+        _data = await dataBase.collection('info').find({ host: { $exists: true } }).toArray();
         // _data = client.db;
         console.log("### info", _data);
     } catch (error) {
         console.log("mongo-error : ", error);
         _data = "mongo-error : " + error;
+        res.status(500).json(_data)
     } finally {
         client.close();
         res.json(_data)
