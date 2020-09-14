@@ -7,7 +7,7 @@ const { Router } = require('express');
 const findPlayerRouter = Router();
 
 const app = express();
-
+const DEFAULT_PLAYERS_LIMIT = 40;
 
 const bodyParser = require('body-parser');
 const jsonParser = bodyParser.json()
@@ -23,7 +23,7 @@ findPlayerRouter.get('/:nation/', urlencodedParser, async (req, res) => {
     try {
         const { limit, start: _start = false, count} = req.query;
         const _count = count || (!limit && !_start);
-        const _limit = _count ? false : (limit || 30);
+        const _limit = _count ? false : (limit || DEFAULT_PLAYERS_LIMIT);
         console.log("####### get nation query  : ", req.query);
         console.log("####### _limit _start _count  : ", _limit, _start ,_count);
 
@@ -36,8 +36,12 @@ findPlayerRouter.get('/:nation/', urlencodedParser, async (req, res) => {
             { limit: +_limit || false, start: _start || false}
         );
 
-        console.log("### resp info", typeof answer, answer && answer.length);
-        _resp = _count ? answer.length : answer
+        console.log("### resp info", answer );
+
+        // console.log("### resp info", answer && answer.data.length);
+        
+        _resp = _count ? answer.count : answer;
+        // _resp = _count ? answer.length : answer
     } catch (error) {
         _resp = error.message;
         console.log("/:nation/ error", error)
