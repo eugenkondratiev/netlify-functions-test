@@ -1,13 +1,17 @@
-const firebaseConfig = require('./connection-pefl-firebase');
+const dotenv = require('dotenv');
+dotenv.config();
 
-
-// import * as firebase from 'firebase/app';
-// import 'firebase/database';
-// import 'firebase/auth'
-
+const firebaseConfig = {
+  apiKey: process.env.FIREBASE_CONFIG_APIKEY,
+  authDomain: process.env.FIREBASE_CONFIG_AUTHDOMAIN,
+  databaseURL: process.env.FIREBASE_CONFIG_DATABASEURL,
+  projectId: process.env.FIREBASE_CONFIG_PROJECTID,
+  storageBucket: process.env.FIREBASE_CONFIG_STORAGEBUCKET,
+  messagingSenderId: process.env.FIREBASE_CONFIG_MESSAGINGSENDERID,
+  appId: process.env.FIREBASE_CONFIG_APPID
+};
 
 const firebase = require('firebase');
-// const app = firebase.initializeApp(firebaseConfig);
 
 class Firebase {
   constructor() {
