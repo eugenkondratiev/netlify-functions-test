@@ -3,8 +3,9 @@ const express = require('express');
 // const querystring = require('querystring');
 const serverless = require('serverless-http');
 const { Router } = require('express');
-
+const normName = require('../utils/normalize-name');
 const findPlayerRouter = Router();
+const getMongoData = require('../mongo/get-mongo-data');
 
 const app = express();
 const DEFAULT_PLAYERS_LIMIT = 40;
@@ -15,31 +16,74 @@ const jsonParser = bodyParser.json()
 // create application/x-www-form-urlencoded parser
 const urlencodedParser = bodyParser.urlencoded({ extended: false })
 
+findPlayerRouter.get('/bor/', urlencodedParser, async (req, res) => {
+    console.log("#### GET find-players bor Route");
+    let _resp = null;
+    // const { name } = req.params;
+
+    try {
+
+        const { limit, start: _start = false, count, name = " "} = req.query;
+
+        const normalizedName = normName(name);
+        const firstLetter = normalizedName[0];
+        const restName = normalizedName.slice(1);
+        const _projection = [...restName].join('.') + '.pl';
+        console.log("name", name, firstLetter, restName);
+        console.log("_projection", _projection);
+        console.log("####### get bor query  : ", req.query);
+        const answer = await getMongoData(
+            'players-bor',
+            { _id: firstLetter },
+            { limit: 5, start: false },
+            { [`${_projection}`]: 1 }
+        );
+
+        console.log("### resp info", answer);
+
+        // console.log("### resp info", answer && answer.data.length);
+
+        _resp = answer;
+        // _resp = _count ? answer.length : answer
+    } catch (error) {
+        _resp = error.message;
+        console.log("/bor/ error", error)
+    }
+    finally {
+        console.log("### finally resp ", _resp)
+
+        res.json(_resp)
+
+    }
+
+})
+
+
 findPlayerRouter.get('/:nation/', urlencodedParser, async (req, res) => {
     console.log("#### GET find-players XXX Route");
     let _resp = null;
     const { nation } = req.params;
 
     try {
-        const { limit, start: _start = false, count} = req.query;
+        const { limit, start: _start = false, count } = req.query;
         const _count = count || (!limit && !_start);
         const _limit = _count ? false : (limit || DEFAULT_PLAYERS_LIMIT);
         console.log("####### get nation query  : ", req.query);
-        console.log("####### _limit _start _count  : ", _limit, _start ,_count);
+        console.log("####### _limit _start _count  : ", _limit, _start, _count);
 
         console.log("####### get nation params : ", req.params, "  nation = ", nation, +nation, +nation ? { "nation": +nation } : {});
         console.log("#### GET find-players nation  Route");
 
-        const answer = await require('../mongo/get-mongo-data')(
+        const answer = await getMongoData(
             'allbase',
             +nation ? { "nation": nation } : {},
-            { limit: +_limit || false, start: _start || false}
+            { limit: +_limit || false, start: _start || false }
         );
 
-        console.log("### resp info", answer );
+        console.log("### resp info", answer);
 
         // console.log("### resp info", answer && answer.data.length);
-        
+
         _resp = _count ? answer.count : answer;
         // _resp = _count ? answer.length : answer
     } catch (error) {
@@ -55,6 +99,7 @@ findPlayerRouter.get('/:nation/', urlencodedParser, async (req, res) => {
 
 })
 
+
 findPlayerRouter.get('/', urlencodedParser, async (req, res) => {
     console.log("#### GET find-players Route");
     // const params = url.parse(req.url, true).query;
@@ -69,7 +114,7 @@ findPlayerRouter.get('/', urlencodedParser, async (req, res) => {
     console.log("####### POST query  : ", req.query);
     // console.log("####### POST _nation  : ", _nation);
 
-    const _base = await require('../mongo/get-mongo-data')('allbase', {}, { limit: +_limit || 20, start: _start || false });
+    const _base = await getMongoData('allbase', {}, { limit: +_limit || 20, start: _start || false });
     console.log("### info", _base.length)
     res.json(_base)
 })
