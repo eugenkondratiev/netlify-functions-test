@@ -6,6 +6,7 @@ const { Router } = require('express');
 const normName = require('../utils/normalize-name');
 const findPlayerRouter = Router();
 const getMongoData = require('../mongo/get-mongo-data');
+const getPlayersFromResponse = require('../utils/get-player-from-response');
 
 const app = express();
 const DEFAULT_PLAYERS_LIMIT = 40;
@@ -23,7 +24,7 @@ findPlayerRouter.get('/bor/', urlencodedParser, async (req, res) => {
 
     try {
 
-        const { limit, start: _start = false, count, name = " "} = req.query;
+        const { limit, start: _start = false, count, name = " " } = req.query;
 
         const normalizedName = normName(name);
         const firstLetter = normalizedName[0];
@@ -42,8 +43,12 @@ findPlayerRouter.get('/bor/', urlencodedParser, async (req, res) => {
         console.log("### resp info", answer);
 
         // console.log("### resp info", answer && answer.data.length);
-
-        _resp = answer;
+        const players = answer.count ? getPlayersFromResponse(answer.data[0], restName) : [];
+        console.log("players - ", players);
+        _resp = {
+            count: players.length, 
+            data:players,
+             error: players.length ? undefined : "NO_PLAYER_FOUND"};
         // _resp = _count ? answer.length : answer
     } catch (error) {
         _resp = error.message;

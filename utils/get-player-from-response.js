@@ -5,7 +5,7 @@ const getNextNode = (_k, restName) => {
         ? _k.pl
         : _k[letter]
             ? getNextNode(_k[letter], restName.slice(1))
-            : null;
+            : [];
 }
 
 module.exports = getNextNode;
